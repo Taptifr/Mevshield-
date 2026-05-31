@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MEVShield — Private DeFi Trading</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --bg-tertiary: #eeece6;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b67;
+    --border: rgba(0,0,0,0.12);
+    --border-med: rgba(0,0,0,0.2);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --c-accent: #7F77DD;
+    --c-accent-light: #EEEDFE;
+    --c-accent-dark: #3C3489;
+    --c-success: #1D9E75;
+    --c-success-light: #E1F5EE;
+    --c-danger: #E24B4A;
+    --c-danger-light: #FCEBEB;
+    --c-warn: #BA7517;
+    --c-warn-light: #FAEEDA;
+    --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1c1c1a;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2e2e2c;
+      --text-primary: #f0ede6;
+      --text-secondary: #9e9b94;
+      --border: rgba(255,255,255,0.1);
+      --border-med: rgba(255,255,255,0.18);
+      --c-accent-light: #2a2850;
+      --c-accent-dark: #b0abf0;
+      --c-success-light: #0d2e22;
+      --c-danger-light: #2e1414;
+      --c-warn-light: #2e1f06;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--bg-secondary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 0 0.5px var(--border);
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-primary);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--c-accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon i { color: #fff; font-size: 18px; }
+  .logo-name { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+  .logo-name span { color: var(--c-accent); }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge-enc {
+    background: var(--c-accent-light); color: var(--c-accent-dark);
+    border: 0.5px solid var(--c-accent);
+  }
+  .badge-live {
+    background: var(--c-success-light); color: var(--c-success);
+    border: 0.5px solid #9FE1CB;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--c-success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .wallet-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border-med);
+    background: var(--bg-secondary);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+  }
+  .wallet-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--c-accent-light);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wallet-avatar i { font-size: 13px; color: var(--c-accent); }
+
+  /* ── Nav tabs ── */
+  .nav-tabs {
+    display: flex;
+    padding: 0 24px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-primary);
+    gap: 0;
+  }
+  .tab {
+    padding: 13px 18px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    border: none; border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    background: none; font-family: inherit;
+    display: flex; align-items: center; gap: 6px;
+    transition: color .15s, border-color .15s;
+  }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { color: var(--c-accent); border-bottom-color: var(--c-accent); }
+
+  /* ── Layout ── */
+  .main { display: flex; flex: 1; gap: 0; }
+  .panel-left {
+    flex: 1.2; padding: 20px 24px;
+    border-right: 0.5px solid var(--border);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .panel-right {
+    flex: 0.85; padding: 20px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: .07em; font-weight: 600;
+    color: var(--text-secondary); margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* ── Swap UI ── */
+  .token-input {
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: border-color .15s;
+  }
+  .token-input:focus-within { border-color: var(--c-accent); }
+  .token-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .token-amount {
+    font-size: 24px; font-weight: 500;
+    background: none; border: none; outline: none;
+    color: var(--text-primary); width: 130px; font-family: inherit;
+  }
+  .token-amount[readonly] { color: var(--c-accent); }
+  .token-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-med);
+    border-radius: 20px; padding: 6px 10px 6px 6px;
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: border-color .15s;
+    user-select: none;
+  }
+  .token-badge:hover { border-color: var(--c-accent); }
+  .token-icon {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .swap-arrow-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--bg-secondary); border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; align-self: center; transition: transform .25s, border-color .15s;
+  }
+  .swap-arrow-btn:hover { transform: rotate(180deg); border-color: var(--c-accent); }
+
+  .info-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0; font-size: 12px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-k { color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+  .info-v { font-weight: 500; }
+
+  .slip-btn {
+    padding: 3px 9px; border-radius: 20px; font-size: 11px;
+    border: 0.5px solid var(--border-med);
+    background: var(--bg-secondary);
+    cursor: pointer; font-family: inherit;
+    color: var(--text-secondary); transition: all .15s;
+  }
+  .slip-btn.active {
+    background: var(--c-accent-light); color: var(--c-accent-dark);
+    border-color: var(--c-accent);
+  }
+
+  /* ── Shield toggle row ── */
+  .shield-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px;
+    background: var(--c-accent-light);
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--c-accent);
+  }
+  .shield-label {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 13px; color: var(--c-accent-dark); font-weight: 500;
+  }
+  .toggle {
+    width: 42px; height: 23px; border-radius: 12px;
+    background: var(--c-accent); position: relative;
+    cursor: pointer; border: none; outline: none;
+    transition: background .2s;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    width: 19px; height: 19px; border-radius: 50%;
+    background: #fff; top: 2px; left: 21px;
+    transition: left .2s;
+  }
+  .toggle.off { background: var(--border-med); }
+  .toggle.off::after { left: 2px; }
+
+  /* ── Encryption flow ── */
+  .enc-flow { display: flex; flex-direction: column; gap: 7px; }
+  .flow-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border);
+    font-size: 12px; transition: all .3s;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+  }
+  .flow-step.active {
+    border-color: var(--c-accent);
+    background: var(--c-accent-light);
+    color: var(--text-primary);
+  }
+  .flow-step.done {
+    border-color: #9FE1CB;
+    background: var(--c-success-light);
+    color: var(--text-primary);
+  }
+  .step-num {
+    width: 23px; height: 23px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+    background: var(--bg-secondary); color: var(--text-secondary);
+    transition: all .3s;
+  }
+  .flow-step.active .step-num { background: var(--c-accent); color: #fff; }
+  .flow-step.done .step-num { background: var(--c-success); color: #fff; }
+
+  /* ── Submit button ── */
+  .submit-btn {
+    width: 100%; padding: 14px;
+    border-radius: var(--radius-md);
+    background: var(--c-accent); color: #fff;
+    font-size: 15px; font-weight: 600;
+    border: none; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .15s, transform .1s, background .3s;
+  }
+  .submit-btn:hover:not(:disabled) { opacity: .9; }
+  .submit-btn:active:not(:disabled) { transform: scale(.99); }
+  .submit-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ── Stats grid ── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .stat-cell {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .stat-value { font-size: 16px; font-weight: 600; }
+  .stat-value.green { color: var(--c-success); }
+  .stat-value.purple { color: var(--c-accent); }
+  .stat-value.red { color: var(--c-danger); }
+
+  /* ── Bot attempt ── */
+  .bot-attempt {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background: var(--c-danger-light);
+    border: 0.5px solid #F09595;
+    font-size: 12px;
+    animation: fadeIn .35s ease-out;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .bot-text { flex: 1; color: #791F1F; }
+  @media (prefers-color-scheme: dark) { .bot-text { color: #f09595; } }
+  .bot-blocked {
+    font-size: 11px; font-weight: 600; color: var(--c-danger);
+    background: var(--bg-primary); border-radius: 20px;
+    padding: 2px 8px; border: 0.5px solid #F09595; white-space: nowrap;
+  }
+
+  /* ── TX list ── */
+  .tx-list { display: flex; flex-direction: column; gap: 7px; }
+  .tx-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary); font-size: 12px;
+  }
+  .tx-icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .tx-pair { font-weight: 600; font-size: 13px; }
+  .tx-time { color: var(--text-secondary); font-size: 11px; }
+  .tx-saved { font-weight: 600; color: var(--c-success); }
+  .tx-status { font-size: 10px; color: var(--text-secondary); }
+
+  /* ── Meter bars ── */
+  .meter-bar-wrap {
+    height: 7px; background: var(--bg-secondary);
+    border-radius: 4px; overflow: hidden;
+    border: 0.5px solid var(--border);
+  }
+  .meter-bar { height: 100%; border-radius: 4px; transition: width 1s ease-out; }
+
+  /* ── What's happening callout ── */
+  .callout-item {
+    display: flex; gap: 9px; align-items: flex-start;
+    padding: 8px 0; border-bottom: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .callout-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .callout-item i { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 680px) {
+    .main { flex-direction: column; }
+    .panel-left { border-right: none; border-bottom: 0.5px solid var(--border); }
+    .panel-right { flex: 1; }
+    .topbar { flex-direction: column; align-items: flex-start; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-shield-lock"></i></div>
+      <div class="logo-name">MEV<span>Shield</span></div>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-enc"><i class="ti ti-lock"></i> FHE encrypted</span>
+      <span class="badge badge-live"><div class="dot"></div> Private mempool active</span>
+      <div class="wallet-chip">
+        <div class="wallet-avatar"><i class="ti ti-user"></i></div>
+        <span>0xd3f1…9a2b</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Nav tabs -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('swap',this)" role="tab" aria-selected="true">
+      <i class="ti ti-arrows-exchange"></i> Private swap
+    </button>
+    <button class="tab" onclick="switchTab('history',this)" role="tab" aria-selected="false">
+      <i class="ti ti-history"></i> Trade history
+    </button>
+    <button class="tab" onclick="switchTab('analytics',this)" role="tab" aria-selected="false">
+      <i class="ti ti-chart-bar"></i> MEV analytics
+    </button>
+  </nav>
+
+  <div class="main">
+
+    <!-- ══ SWAP PANEL ══ -->
+    <section class="panel-left" id="panel-swap" aria-label="Private swap">
+
+      <div class="card">
+        <div class="card-title">Swap tokens</div>
+
+        <!-- Token in -->
+        <div class="token-input">
+          <div>
+            <div class="token-label">You pay</div>
+            <input class="token-amount" type="number" value="1500" id="amtIn" oninput="updateQuote()" aria-label="Amount to pay" />
+          </div>
+          <div class="token-badge" onclick="cycleToken('in')" role="button" tabindex="0" aria-label="Select input token">
+            <div class="token-icon" id="icon-in" style="background:#E6F1FB;color:#185FA5;">Ξ</div>
+            <span id="label-in">ETH</span>
+            <i class="ti ti-chevron-down" style="font-size:12px;color:var(--text-secondary);"></i>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:center;margin:6px 0;">
+          <div class="swap-arrow-btn" onclick="swapTokens()" aria-label="Reverse swap direction">
+            <i class="ti ti-arrows-down-up" style="font-size:14px;color:var(--text-secondary);"></i>
+          </div>
+        </div>
+
+        <!-- Token out -->
+        <div class="token-input">
+          <div>
+            <div class="token-label">You receive <span class="badge badge-enc" style="font-size:10px;padding:2px 7px;">encrypted</span></div>
+            <input class="token-amount" type="number" id="amtOut" readonly aria-label="Amount to receive" />
+          </div>
+          <div class="token-badge" onclick="cycleToken('out')" role="button" tabindex="0" aria-label="Select output token">
+            <div class="token-icon" id="icon-out" style="background:#E1F5EE;color:#0F6E56;">U</div>
+            <span id="label-out">USDC</span>
+            <i class="ti ti-chevron-down" style="font-size:12px;color:var(--text-secondary);"></i>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;"></div>
+
+        <div class="info-row">
+          <span class="info-k"><i class="ti ti-route"></i> Route</span>
+          <span class="info-v" style="font-size:11px;display:flex;align-items:center;gap:5px;">
+            <span class="badge badge-enc" style="font-size:10px;">Encrypted</span>
+            Uniswap v3 → Curve
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-k"><i class="ti ti-percentage"></i> Slippage</span>
+          <div style="display:flex;gap:5px;">
+            <button class="slip-btn active" onclick="setSlip(this,'0.1')">0.1%</button>
+            <button class="slip-btn" onclick="setSlip(this,'0.5')">0.5%</button>
+            <button class="slip-btn" onclick="setSlip(this,'1.0')">1.0%</button>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-k"><i class="ti ti-clock"></i> Commit window</span>
+          <span class="info-v" id="commit-window">3 blocks</span>
+        </div>
+        <div class="info-row">
+          <span class="info-k"><i class="ti ti-trending-up"></i> Est. received</span>
+          <span class="info-v" id="est-out" style="color:var(--c-success);"></span>
+        </div>
+      </div>
+
+      <!-- Shield toggle -->
+      <div class="shield-row">
+        <div class="shield-label">
+          <i class="ti ti-shield-check" style="font-size:17px;"></i>
+          MEV protection active
+        </div>
+        <button class="toggle" id="shield-btn" onclick="toggleShield(this)" aria-label="Toggle MEV protection"></button>
+      </div>
+
+      <!-- Encryption pipeline -->
+      <div class="card">
+        <div class="card-title">Encryption pipeline</div>
+        <div class="enc-flow" id="enc-flow">
+          <div class="flow-step" data-step="0">
+            <div class="step-num">1</div>
+            <span style="flex:1;">Trade intent hashed with FHE keypair</span>
+            <i class="ti ti-lock" style="font-size:13px;color:var(--text-secondary);"></i>
+          </div>
+          <div class="flow-step" data-step="1">
+            <div class="step-num">2</div>
+            <span style="flex:1;">Commitment broadcast to private mempool</span>
+            <i class="ti ti-broadcast" style="font-size:13px;color:var(--text-secondary);"></i>
+          </div>
+          <div class="flow-step" data-step="2">
+            <div class="step-num">3</div>
+            <span style="flex:1;">Reveal phase — execution on-chain</span>
+            <i class="ti ti-bolt" style="font-size:13px;color:var(--text-secondary);"></i>
+          </div>
+          <div class="flow-step" data-step="3">
+            <div class="step-num">4</div>
+            <span style="flex:1;">Settlement confirmed, MEV blocked</span>
+            <i class="ti ti-shield-check" style="font-size:13px;color:var(--text-secondary);"></i>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitTrade()">
+        <i class="ti ti-shield-lock"></i>
+        <span id="btn-text">Execute private swap</span>
+      </button>
+    </section>
+
+    <!-- ══ HISTORY PANEL ══ -->
+    <section class="panel-left" id="panel-history" style="display:none;" aria-label="Trade history">
+      <div class="card">
+        <div class="card-title">
+          Recent private trades
+          <span class="badge badge-live"><div class="dot" style="width:5px;height:5px;background:var(--c-success);"></div> 3 protected today</span>
+        </div>
+        <div class="tx-list">
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--c-success-light);"><i class="ti ti-shield-check" style="font-size:15px;color:var(--c-success);"></i></div>
+            <div style="flex:1;"><div class="tx-pair">ETH → USDC</div><div class="tx-time">2 min ago · Uniswap v3</div></div>
+            <div style="text-align:right;"><div class="tx-saved">+$47.20 saved</div><div class="tx-status">MEV blocked</div></div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--c-success-light);"><i class="ti ti-shield-check" style="font-size:15px;color:var(--c-success);"></i></div>
+            <div style="flex:1;"><div class="tx-pair">WBTC → ETH</div><div class="tx-time">1 hr ago · Curve</div></div>
+            <div style="text-align:right;"><div class="tx-saved">+$182.50 saved</div><div class="tx-status">MEV blocked</div></div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--c-success-light);"><i class="ti ti-shield-check" style="font-size:15px;color:var(--c-success);"></i></div>
+            <div style="flex:1;"><div class="tx-pair">USDC → DAI</div><div class="tx-time">3 hr ago · Curve</div></div>
+            <div style="text-align:right;"><div class="tx-saved">+$12.80 saved</div><div class="tx-status">MEV blocked</div></div>
+          </div>
+          <div class="tx-item" style="background:var(--c-danger-light);border:0.5px solid #F09595;">
+            <div class="tx-icon" style="background:var(--bg-primary);"><i class="ti ti-alert-triangle" style="font-size:15px;color:var(--c-danger);"></i></div>
+            <div style="flex:1;"><div class="tx-pair">ETH → LINK</div><div class="tx-time">Yesterday · Unprotected</div></div>
+            <div style="text-align:right;"><div class="tx-saved" style="color:var(--c-danger);">-$63.10 lost</div><div class="tx-status">Front-run</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total MEV saved this month</div>
+        <div style="font-size:30px;font-weight:700;color:var(--c-success);margin-bottom:6px;">$2,847.60</div>
+        <div style="font-size:12px;color:var(--text-secondary);">Across 34 protected trades · Avg $83.75 per trade</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Lifetime stats</div>
+        <div class="stats-grid">
+          <div class="stat-cell"><div class="stat-label">Total trades</div><div class="stat-value purple">347</div></div>
+          <div class="stat-cell"><div class="stat-label">Protected</div><div class="stat-value green">341</div></div>
+          <div class="stat-cell"><div class="stat-label">Total saved</div><div class="stat-value green">$18,420</div></div>
+          <div class="stat-cell"><div class="stat-label">Bots blocked</div><div class="stat-value purple">1,204</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ ANALYTICS PANEL ══ -->
+    <section class="panel-left" id="panel-analytics" style="display:none;" aria-label="MEV analytics">
+      <div class="card">
+        <div class="card-title">Live MEV attack attempts</div>
+        <div id="bot-feed" style="display:flex;flex-direction:column;gap:7px;min-height:50px;">
+          <div style="font-size:12px;color:var(--text-secondary);padding:6px 0;">Listening to mempool...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Protection rates</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+              <span class="info-k">Front-running blocked</span>
+              <span style="font-weight:600;color:var(--c-success);">98.2%</span>
+            </div>
+            <div class="meter-bar-wrap"><div class="meter-bar" style="width:98%;background:var(--c-success);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+              <span class="info-k">Sandwich attacks stopped</span>
+              <span style="font-weight:600;color:var(--c-accent);">100%</span>
+            </div>
+            <div class="meter-bar-wrap"><div class="meter-bar" style="width:100%;background:var(--c-accent);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+              <span class="info-k">Arbitrage captured by bots</span>
+              <span style="font-weight:600;color:var(--c-warn);">1.8%</span>
+            </div>
+            <div class="meter-bar-wrap"><div class="meter-bar" style="width:2%;background:var(--c-warn);"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Attack type breakdown</div>
+        <div class="stats-grid">
+          <div class="stat-cell"><div class="stat-label">Front-runs today</div><div class="stat-value red" id="fr-count">0</div></div>
+          <div class="stat-cell"><div class="stat-label">Sandwiches today</div><div class="stat-value red" id="sw-count">0</div></div>
+          <div class="stat-cell"><div class="stat-label">$ at risk</div><div class="stat-value purple" id="at-risk">$0</div></div>
+          <div class="stat-cell"><div class="stat-label">$ protected</div><div class="stat-value green" id="protected-amt">$0</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ RIGHT SIDEBAR ══ -->
+    <aside class="panel-right">
+
+      <div class="card">
+        <div class="card-title">Protection summary</div>
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-label">MEV saved</div>
+            <div class="stat-value green" id="mev-saved">$47.20</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Bots blocked</div>
+            <div class="stat-value purple" id="bots-blocked">3</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Execution</div>
+            <div class="stat-value" id="exec-price" style="font-size:13px;">Market price</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Shield mode</div>
+            <div class="stat-value purple" style="font-size:13px;">FHE + CR</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">How it works</div>
+        <div style="display:flex;flex-direction:column;">
+          <div class="callout-item">
+            <i class="ti ti-eye-off" style="color:var(--c-accent);"></i>
+            <span>Your trade is <strong style="color:var(--text-primary);">invisible</strong> in the public mempool — bots see nothing.</span>
+          </div>
+          <div class="callout-item">
+            <i class="ti ti-lock" style="color:var(--c-accent);"></i>
+            <span>Details are <strong style="color:var(--text-primary);">FHE-encrypted</strong> and revealed only at execution.</span>
+          </div>
+          <div class="callout-item">
+            <i class="ti ti-check" style="color:var(--c-success);"></i>
+            <span>You receive the <strong style="color:var(--text-primary);">exact price you signed</strong> — no sandwich possible.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Live bot attempts</div>
+        <div id="live-bots" style="display:flex;flex-direction:column;gap:7px;min-height:60px;">
+          <div style="font-size:12px;color:var(--text-secondary);padding:6px 0;">Monitoring mempool...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Network</div>
+        <div class="info-row">
+          <span class="info-k">Mempool</span>
+          <span class="info-v" style="color:var(--c-accent);">Private (Flashbots)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-k">Encryption</span>
+          <span class="info-v">FHE + Commit-reveal</span>
+        </div>
+        <div class="info-row">
+          <span class="info-k">Gas premium</span>
+          <span class="info-v">~2.1%</span>
+        </div>
+        <div class="info-row">
+          <span class="info-k">Block</span>
+          <span class="info-v" id="block-num">19,847,220</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<script>
+const RATES = {
+  'ETH/USDC': 2847.3, 'ETH/DAI': 2845.1, 'ETH/WBTC': 0.0527,
+  'USDC/ETH': 0.000351, 'USDC/DAI': 0.9998, 'USDC/WBTC': 0.0000185,
+  'WBTC/ETH': 18.97, 'WBTC/USDC': 54200, 'WBTC/DAI': 54180,
+  'DAI/ETH': 0.000351, 'DAI/USDC': 1.0001, 'DAI/WBTC': 0.0000184,
+};
+const TOKENS = [
+  {sym:'ETH',  icon:'Ξ', bg:'#E6F1FB', fg:'#185FA5'},
+  {sym:'USDC', icon:'U', bg:'#E1F5EE', fg:'#0F6E56'},
+  {sym:'WBTC', icon:'₿', bg:'#FAEEDA', fg:'#633806'},
+  {sym:'DAI',  icon:'D', bg:'#EEEDFE', fg:'#3C3489'},
+];
+let inIdx=0, outIdx=1, shieldOn=true, trading=false, botIdx=0;
+let frCount=0, swCount=0, atRisk=0, protectedAmt=0;
+
+const BOT_MSGS = [
+  'Sandwich bot 0xAB3f detected ETH/USDC movement',
+  'Front-run attempt from jaredfromsubway.eth',
+  'MEV bot 0x71C probing USDC/ETH price band',
+  'Arbitrage searcher targeting your slippage',
+  'Generalized MEV bot scanning private mempool',
+  'Flashbot bundle attempt intercepted',
+  'Back-run opportunity detected and blocked',
+];
+
+function getRate(a, b) {
+  const pair = TOKENS[a].sym+'/'+TOKENS[b].sym;
+  if (RATES[pair]) return RATES[pair];
+  const inv = TOKENS[b].sym+'/'+TOKENS[a].sym;
+  if (RATES[inv]) return 1/RATES[inv];
+  return 1;
+}
+
+function updateQuote() {
+  const amt = parseFloat(document.getElementById('amtIn').value) || 0;
+  const rate = getRate(inIdx, outIdx);
+  const slipFactor = shieldOn ? 0.9995 : 0.974;
+  const out = (amt * rate * slipFactor).toFixed(4);
+  document.getElementById('amtOut').value = out;
+  document.getElementById('est-out').textContent = out + ' ' + TOKENS[outIdx].sym;
+  const mevValue = (amt * rate * 0.013).toFixed(2);
+  document.getElementById('mev-saved').textContent = '$' + mevValue;
+}
+
+function refreshTokenUI() {
+  const ti = TOKENS[inIdx], to = TOKENS[outIdx];
+  const ii = document.getElementById('icon-in');
+  ii.textContent = ti.icon; ii.style.background = ti.bg; ii.style.color = ti.fg;
+  document.getElementById('label-in').textContent = ti.sym;
+  const io = document.getElementById('icon-out');
+  io.textContent = to.icon; io.style.background = to.bg; io.style.color = to.fg;
+  document.getElementById('label-out').textContent = to.sym;
+  updateQuote();
+}
+
+function cycleToken(side) {
+  if (side === 'in') {
+    inIdx = (inIdx + 1) % TOKENS.length;
+    if (inIdx === outIdx) inIdx = (inIdx + 1) % TOKENS.length;
+  } else {
+    outIdx = (outIdx + 1) % TOKENS.length;
+    if (outIdx === inIdx) outIdx = (outIdx + 1) % TOKENS.length;
+  }
+  refreshTokenUI();
+}
+
+function swapTokens() {
+  [inIdx, outIdx] = [outIdx, inIdx];
+  const curOut = document.getElementById('amtOut').value;
+  document.getElementById('amtIn').value = parseFloat(curOut).toFixed(4);
+  refreshTokenUI();
+}
+
+function toggleShield(btn) {
+  shieldOn = !shieldOn;
+  btn.classList.toggle('off', !shieldOn);
+  updateQuote();
+}
+
+function setSlip(btn, val) {
+  document.querySelectorAll('.slip-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const blocks = val === '0.1' ? '3' : val === '0.5' ? '5' : '8';
+  document.getElementById('commit-window').textContent = blocks + ' blocks';
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+  el.classList.add('active'); el.setAttribute('aria-selected','true');
+  ['swap','history','analytics'].forEach(p => {
+    document.getElementById('panel-'+p).style.display = p === name ? 'flex' : 'none';
+  });
+  if (name === 'analytics') initAnalyticsFeed();
+}
+
+function submitTrade() {
+  if (trading) return;
+  trading = true;
+  const btn = document.getElementById('submit-btn');
+  const txt = document.getElementById('btn-text');
+  const steps = document.querySelectorAll('.flow-step');
+  btn.disabled = true;
+  let s = 0;
+  const labels = ['Encrypting trade intent...','Broadcasting to private mempool...','Executing on-chain...','Confirming settlement...'];
+  function advance() {
+    if (s > 0) { steps[s-1].classList.remove('active'); steps[s-1].classList.add('done'); }
+    if (s < steps.length) {
+      steps[s].classList.add('active');
+      txt.textContent = labels[s];
+      s++; setTimeout(advance, 950);
+    } else {
+      txt.textContent = 'Trade executed — MEV blocked!';
+      btn.style.background = 'var(--c-success)';
+      const old = parseInt(document.getElementById('bots-blocked').textContent);
+      document.getElementById('bots-blocked').textContent = old + 1;
+      setTimeout(() => {
+        steps.forEach(st => { st.classList.remove('active','done'); });
+        btn.disabled = false; btn.style.background = '';
+        trading = false; txt.textContent = 'Execute private swap';
+      }, 2500);
+    }
+  }
+  advance();
+}
+
+function spawnBotAlert() {
+  const feed = document.getElementById('live-bots');
+  const placeholder = feed.querySelector('div:not(.bot-attempt)');
+  if (placeholder) feed.removeChild(placeholder);
+  const el = document.createElement('div');
+  el.className = 'bot-attempt';
+  el.innerHTML = `<i class="ti ti-robot" style="font-size:14px;color:var(--c-danger);flex-shrink:0;"></i><div class="bot-text">${BOT_MSGS[botIdx % BOT_MSGS.length]}</div><div class="bot-blocked"><i class="ti ti-shield-check"></i> Blocked</div>`;
+  if (feed.children.length >= 3) feed.removeChild(feed.lastChild);
+  feed.insertBefore(el, feed.firstChild);
+  botIdx++;
+}
+
+function initAnalyticsFeed() {
+  spawnAnalyticBot();
+}
+
+function spawnAnalyticBot() {
+  const feed = document.getElementById('bot-feed');
+  const placeholder = feed.querySelector('div:not(.bot-attempt)');
+  if (placeholder) feed.removeChild(placeholder);
+  const isSandwich = Math.random() > 0.5;
+  const risk = (Math.random() * 200 + 20).toFixed(2);
+  if (isSandwich) swCount++; else frCount++;
+  atRisk += parseFloat(risk);
+  protectedAmt += parseFloat(risk);
+  const el = document.createElement('div');
+  el.className = 'bot-attempt';
+  el.innerHTML = `<i class="ti ti-robot" style="font-size:14px;color:var(--c-danger);flex-shrink:0;"></i><div class="bot-text">${isSandwich?'Sandwich':'Front-run'}: ${BOT_MSGS[botIdx%BOT_MSGS.length]} — $${risk} at risk</div><div class="bot-blocked">Blocked</div>`;
+  if (feed.children.length >= 5) feed.removeChild(feed.lastChild);
+  feed.insertBefore(el, feed.firstChild);
+  const fc = document.getElementById('fr-count'); if(fc) fc.textContent = frCount;
+  const sc = document.getElementById('sw-count'); if(sc) sc.textContent = swCount;
+  const ar = document.getElementById('at-risk'); if(ar) ar.textContent = '$'+atRisk.toFixed(0);
+  const pa = document.getElementById('protected-amt'); if(pa) pa.textContent = '$'+protectedAmt.toFixed(0);
+  botIdx++;
+}
+
+// Intervals
+setInterval(spawnBotAlert, 3800);
+setInterval(() => {
+  if (document.getElementById('panel-analytics').style.display !== 'none') spawnAnalyticBot();
+}, 3000);
+setInterval(() => {
+  const b = document.getElementById('block-num');
+  if (b) b.textContent = (parseInt(b.textContent.replace(/,/g,'')) + 1).toLocaleString();
+}, 2000);
+
+updateQuote();
+</script>
+</body>
+</html>
