@@ -1,6 +1,7 @@
 MEV (Maximul Extractable Value)
 The extra profit that blockchain block producers (validators in PoS or miners in PoW) can earn by reordering, including, or excluding transactions 
 in a block beyond the standard block rewards and gas fees. 
+
 **Problem**
 In DeFi, bots front-run trades (MEV), Users lose money silently
 **Solution**
