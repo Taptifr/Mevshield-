@@ -3,7 +3,7 @@ The extra profit that blockchain block producers (validators in PoS or miners in
 in a block beyond the standard block rewards and gas fees. 
 
 **Problem**
-In DeFi, bots front-run trades (MEV), Users lose money silently
+In DeFi, bots front-run trades (MEV), Users lose money silently. 
 **Solution**
 Encrypted transaction execution
 -Trade details hidden until execution
@@ -19,5 +19,5 @@ MEV protection layer
 Core trading flow
 -Token swap UI with live quote calculation across ETH, USDC, WBTC, and DAI pairs
 -Adjustable slippage with commit-window blocks that scale accordingly
-- 4-step encryption pipeline that actually runs when you hit "Execute" watch it walk through hash → commit → reveal → settle
+-4-step encryption pipeline that actually runs when you hit "Execute" watch it walk through hash → commit → reveal → settle
 
