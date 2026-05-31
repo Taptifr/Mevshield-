@@ -67,7 +67,7 @@
     box-shadow: 0 0 0 0.5px var(--border);
   }
 
-  /* ── Topbar ── */
+  
   .topbar {
     display: flex;
     align-items: center;
@@ -125,7 +125,7 @@
   }
   .wallet-avatar i { font-size: 13px; color: var(--c-accent); }
 
-  /* ── Nav tabs ── */
+  
   .nav-tabs {
     display: flex;
     padding: 0 24px;
@@ -146,7 +146,7 @@
   .tab:hover { color: var(--text-primary); }
   .tab.active { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 
-  /* ── Layout ── */
+  
   .main { display: flex; flex: 1; gap: 0; }
   .panel-left {
     flex: 1.2; padding: 20px 24px;
@@ -158,7 +158,7 @@
     display: flex; flex-direction: column; gap: 14px;
   }
 
-  /* ── Card ── */
+  
   .card {
     background: var(--bg-primary);
     border: 0.5px solid var(--border);
@@ -172,7 +172,7 @@
     display: flex; align-items: center; justify-content: space-between;
   }
 
-  /* ── Swap UI ── */
+  
   .token-input {
     background: var(--bg-secondary);
     border: 0.5px solid var(--border);
@@ -233,7 +233,7 @@
     border-color: var(--c-accent);
   }
 
-  /* ── Shield toggle row ── */
+  
   .shield-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 11px 14px;
@@ -260,7 +260,7 @@
   .toggle.off { background: var(--border-med); }
   .toggle.off::after { left: 2px; }
 
-  /* ── Encryption flow ── */
+ 
   .enc-flow { display: flex; flex-direction: column; gap: 7px; }
   .flow-step {
     display: flex; align-items: center; gap: 10px;
@@ -291,7 +291,7 @@
   .flow-step.active .step-num { background: var(--c-accent); color: #fff; }
   .flow-step.done .step-num { background: var(--c-success); color: #fff; }
 
-  /* ── Submit button ── */
+  
   .submit-btn {
     width: 100%; padding: 14px;
     border-radius: var(--radius-md);
@@ -305,7 +305,7 @@
   .submit-btn:active:not(:disabled) { transform: scale(.99); }
   .submit-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-  /* ── Stats grid ── */
+  
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
   .stat-cell {
     background: var(--bg-secondary);
@@ -318,7 +318,7 @@
   .stat-value.purple { color: var(--c-accent); }
   .stat-value.red { color: var(--c-danger); }
 
-  /* ── Bot attempt ── */
+  
   .bot-attempt {
     display: flex; align-items: center; gap: 8px;
     padding: 9px 11px;
@@ -337,7 +337,7 @@
     padding: 2px 8px; border: 0.5px solid #F09595; white-space: nowrap;
   }
 
-  /* ── TX list ── */
+  
   .tx-list { display: flex; flex-direction: column; gap: 7px; }
   .tx-item {
     display: flex; align-items: center; gap: 10px;
@@ -363,7 +363,7 @@
   }
   .meter-bar { height: 100%; border-radius: 4px; transition: width 1s ease-out; }
 
-  /* ── What's happening callout ── */
+  
   .callout-item {
     display: flex; gap: 9px; align-items: flex-start;
     padding: 8px 0; border-bottom: 0.5px solid var(--border);
@@ -372,7 +372,7 @@
   .callout-item:last-child { border-bottom: none; padding-bottom: 0; }
   .callout-item i { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
 
-  /* ── Responsive ── */
+  
   @media (max-width: 680px) {
     .main { flex-direction: column; }
     .panel-left { border-right: none; border-bottom: 0.5px solid var(--border); }
@@ -385,7 +385,7 @@
 <body>
 <div class="app">
 
-  <!-- Topbar -->
+
   <header class="topbar">
     <div class="logo">
       <div class="logo-icon"><i class="ti ti-shield-lock"></i></div>
@@ -401,7 +401,7 @@
     </div>
   </header>
 
-  <!-- Nav tabs -->
+  
   <nav class="nav-tabs" role="tablist">
     <button class="tab active" onclick="switchTab('swap',this)" role="tab" aria-selected="true">
       <i class="ti ti-arrows-exchange"></i> Private swap
@@ -416,13 +416,13 @@
 
   <div class="main">
 
-    <!-- ══ SWAP PANEL ══ -->
+   
     <section class="panel-left" id="panel-swap" aria-label="Private swap">
 
       <div class="card">
         <div class="card-title">Swap tokens</div>
 
-        <!-- Token in -->
+        
         <div class="token-input">
           <div>
             <div class="token-label">You pay</div>
@@ -441,7 +441,7 @@
           </div>
         </div>
 
-        <!-- Token out -->
+       
         <div class="token-input">
           <div>
             <div class="token-label">You receive <span class="badge badge-enc" style="font-size:10px;padding:2px 7px;">encrypted</span></div>
@@ -481,7 +481,7 @@
         </div>
       </div>
 
-      <!-- Shield toggle -->
+      
       <div class="shield-row">
         <div class="shield-label">
           <i class="ti ti-shield-check" style="font-size:17px;"></i>
@@ -523,7 +523,7 @@
       </button>
     </section>
 
-    <!-- ══ HISTORY PANEL ══ -->
+    
     <section class="panel-left" id="panel-history" style="display:none;" aria-label="Trade history">
       <div class="card">
         <div class="card-title">
@@ -569,7 +569,7 @@
       </div>
     </section>
 
-    <!-- ══ ANALYTICS PANEL ══ -->
+   
     <section class="panel-left" id="panel-analytics" style="display:none;" aria-label="MEV analytics">
       <div class="card">
         <div class="card-title">Live MEV attack attempts</div>
@@ -614,7 +614,7 @@
       </div>
     </section>
 
-    <!-- ══ RIGHT SIDEBAR ══ -->
+   
     <aside class="panel-right">
 
       <div class="card">
@@ -851,7 +851,7 @@ function spawnAnalyticBot() {
   botIdx++;
 }
 
-// Intervals
+
 setInterval(spawnBotAlert, 3800);
 setInterval(() => {
   if (document.getElementById('panel-analytics').style.display !== 'none') spawnAnalyticBot();
