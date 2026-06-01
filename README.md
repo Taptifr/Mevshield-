@@ -21,3 +21,6 @@ Core trading flow
 -Adjustable slippage with commit-window blocks that scale accordingly
 -4-step encryption pipeline that actually runs when you hit "Execute" watch it walk through hash → commit → reveal → settle
 
+
+MEVSHIELD is a DeFi security layer that protects users from MEV attacks like front-running and sandwich attacks during blockchain transactions. It analyzes every trade in real time, detects potential risks, and routes high-risk transactions through private execution paths to prevent bots from exploiting them. The goal is to help users trade more safely and keep more of their money instead of losing value to MEV extractors.
+
